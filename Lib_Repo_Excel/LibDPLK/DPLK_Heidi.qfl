@@ -1,0 +1,205 @@
+﻿REM-----Create Session Heidi
+Sub CreateSessionHeidi
+	Call spCloseProgram()
+	wait 5
+	'Buka Aplikasi Heidi
+	Call spOpenProgram()
+	wait 5
+	If Window("Check for HeidiSQL updates").Exist(5) Then
+		Window("Check for HeidiSQL updates").WinObject("Skip").Click
+	End If
+	
+	If Window("HeidiApps").Exist(5) Then
+		Call CaptureImageUFTV2(Window("HeidiApps"), "Membuka Aplikasi Database (Heidisql)", " ", compatibilityMode.Desktop, ReportStatus.Passed)	
+	End If
+	
+	'Klik New Session Heidi
+	wait 2
+		Window("HeidiApps").WinObject("NewSession").Click
+	wait 1
+	
+	Dim dtUser, dtPassword, dtHostname
+	dtUser 		= DataTable.Value("USER_DB", dtLocalsheet)
+	dtPassword	= DataTable.Value("PASSWORD_DB", dtLocalsheet)
+	dtHostname	= DataTable.Value("HOSTNAME", dtLocalsheet)
+	
+	'Isi field untuk masuk ke database server digisales
+	Window("HeidiApps").WinComboBox("ComboBoxNetworkType").Click
+	Window("HeidiApps").WinComboBox("ComboBoxNetworkType").Click
+	Set objkey = CreateObject("WScript.Shell")
+	wait 1
+			objkey.SendKeys "{DOWN 5}"
+	wait 1
+			objkey.SendKeys "{ENTER}"
+	wait 1
+			objkey.SendKeys "{TAB 2}"
+	wait 1			
+			objkey.SendKeys(dtHostname)
+	wait 1		
+			objkey.SendKeys "{TAB 3}"
+	wait 1		
+			objkey.SendKeys(dtUser)
+	wait 1		
+			objkey.SendKeys "{TAB}"
+	wait 1		
+			objkey.SendKeys(dtPassword)
+	wait 2
+			Call CaptureImageUFTV2(Window("HeidiApps"), "Mengisi Field Yang diperlukan", " ", compatibilityMode.Desktop, ReportStatus.Done)		
+	wait 2
+			objkey.SendKeys "{ENTER}"
+	wait 2
+			objkey.SendKeys "{ENTER}"
+	wait 2 
+			Window("HeidiSQL 12.0.0.6468").Maximize
+End Sub
+
+REM-----Create Session Heidi tanpa capture ke report
+Sub CreateSessionHeidi_noSS
+	Call spCloseProgram()
+	wait 5
+	Call spOpenProgram()
+	wait 5
+	wait 2
+	Window("HeidiApps").WinObject("NewSession").Click
+	wait 1
+	
+	Dim dtUser, dtPassword, dtHostname
+	dtUser 		= DataTable.Value("USER_DB", dtLocalsheet)
+	dtPassword	= DataTable.Value("PASSWORD_DB", dtLocalsheet)
+	dtHostname	= DataTable.Value("HOSTNAME", dtLocalsheet)
+	
+	Window("HeidiApps").WinComboBox("ComboBoxNetworkType").Click
+	Window("HeidiApps").WinComboBox("ComboBoxNetworkType").Click
+	Set objkey = CreateObject("WScript.Shell")
+	wait 1
+			objkey.SendKeys "{DOWN 5}"
+	wait 1
+			objkey.SendKeys "{ENTER}"
+	wait 1
+			objkey.SendKeys "{TAB 2}"
+	wait 1			
+			objkey.SendKeys(dtHostname)
+	wait 1		
+			objkey.SendKeys "{TAB 3}"
+	wait 1		
+			objkey.SendKeys(dtUser)
+	wait 1		
+			objkey.SendKeys "{TAB}"
+	wait 1		
+			objkey.SendKeys(dtPassword)
+	wait 5
+			objkey.SendKeys "{ENTER}"
+	wait 10
+			objkey.SendKeys "{ENTER}"
+	wait 5
+			Window("HeidiSQL 12.0.0.6468").Maximize
+			wait 2
+End Sub
+
+REM-----Fungsi Mengeksekusi Query
+Sub ExecuteSQL
+	Dim query1, query2
+		query1		=	DataTable.Value("QUERY1", dtLocalsheet)
+		query2		=	DataTable.Value("QUERY2", dtLocalsheet)
+		query3		=	DataTable.Value("QUERY3", dtLocalsheet)
+		Expl_Query1	=	DataTable.Value("EXPL_QUERY1", dtLocalsheet)
+		Expl_Query2	=	DataTable.Value("EXPL_QUERY2", dtLocalsheet)
+		Expl_Query3	=	DataTable.Value("EXPL_QUERY3", dtLocalsheet)
+	wait 2
+	'buka tab field query baru
+	Set objkey = CreateObject("WScript.Shell")
+		objkey.SendKeys("^t")
+	wait 3
+		Window("HeidiSQL 12.0.0.6468").WinObject("Query_2").Click
+	'Mengisi Field query dengan query dari excel
+	wait 3
+		objkey.SendKeys("^a")
+		objkey.SendKeys "{BACKSPACE}"
+		If len(DataTable.Value("QUERY1", dtLocalsheet)) > 600  Then
+		wait 10
+			objkey.SendKeys(query1)
+		wait 20
+		else
+		objkey.SendKeys(query1)
+		End If
+		
+	'Running query	
+		wait 10
+		objkey.SendKeys "{F9}"
+		wait 10
+	Call CaptureImageUFTV2(Window("HeidiSQL 12.0.0.6468"), Expl_Query1 , " ", compatibilityMode.Desktop, ReportStatus.Passed)		
+		
+	'Menutup field query
+'	Window("HeidiSQL 12.0.0.6468").WinObject("Query_2").Click
+	wait 4
+		objkey.SendKeys "^{F4}"
+	wait 2
+	
+	'Jika query2 tidak kosong
+	If query2 <> "" Then
+		'Buka tab field query baru
+		Set objkey = CreateObject("WScript.Shell")
+			objkey.SendKeys("^t")
+		wait 1
+			Window("HeidiSQL 12.0.0.6468").WinObject("Query_2").Click
+			
+		'Isi field query sesuai query di excel
+		wait 1
+			objkey.SendKeys("^a")
+			objkey.SendKeys "{BACKSPACE}"
+			objkey.SendKeys(query2)
+		'Running query
+		wait 2
+			objkey.SendKeys "{F9}"
+		wait 10
+			Call CaptureImageUFTV2(Window("HeidiSQL 12.0.0.6468"), Expl_Query2 , " ", compatibilityMode.Desktop, ReportStatus.Passed)	
+		'Menutup field query
+		wait 4
+			objkey.SendKeys "^{F4}"
+		wait 2
+	End If
+	
+	'Jika query3 tidak kosong
+	If query3 <> "" Then
+		'Buka tab field query baru
+		Set objkey = CreateObject("WScript.Shell")
+			objkey.SendKeys("^t")
+		wait 1
+			Window("HeidiSQL 12.0.0.6468").WinObject("Query_2").Click
+		'Mengisi field query sesuai data di excel
+		wait 1
+			objkey.SendKeys("^a")
+			objkey.SendKeys "{BACKSPACE}"
+			objkey.SendKeys(query3)
+		'Running query
+		wait 2
+			objkey.SendKeys "{F9}"
+		wait 4
+			Call CaptureImageUFTV2(Window("HeidiSQL 12.0.0.6468"), Expl_Query3 , " ", compatibilityMode.Desktop, ReportStatus.Passed)	
+		'Menutup field query
+		wait 4
+			objkey.SendKeys "^{F4}"
+		wait 2
+	End If	
+	
+	
+End Sub
+
+'fungsi hapus connection
+Function DeleteConnection()
+	
+End Function
+
+'Fungsi buka aplikasi
+Function spOpenProgram()
+	OpenProgram1		= DataTable.Value ("PROGRAM1", dtGlobalSheet)
+	program_path1		= DataTable.Value ("PROGRAM_PATH1", dtGlobalSheet)
+	InvokeApplication(program_path1 & "/" & openprogram1 & ".exe")
+End Function
+
+'Fungsi tutup aplikasi
+Function spCloseProgram()
+	CloseProgram		= DataTable.Value ("PROGRAM1", dtGlobalSheet)
+	SystemUtil.CloseProcessByName CloseProgram &".exe"
+End Function
+

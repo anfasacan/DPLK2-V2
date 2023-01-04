@@ -1,0 +1,147 @@
+﻿REM ==== Login To Download
+Sub Login_Download()
+	Set objkey = CreateObject("WScript.Shell")
+	objkey.SendKeys ("^{TAB}")
+	wait 3
+	If Browser("Google_Chrome").InsightObject("InsightObject").Exist(5) Then
+'		Call Click_Coordinate(28,3)
+		objkey.SendKeys("DPLKCORERPTDEV\user_rpt")
+		wait 1
+		objkey.SendKeys "{TAB}"
+		wait 1
+		objkey.SendKeys "dplkbni1234/"
+		wait 1
+		objkey.SendKeys "{ENTER}"
+	End If
+	
+End Sub
+
+REM ==== Laporan Pindah Buku 
+Sub Cetak_Laporan_Pindah_Buku
+	Set objkey = CreateObject("WScript.Shell")
+	If DataTable.Value("USER",dtlocalsheet) <> "" Then
+		Browser("DPLK").Page("Laporan Pindah Buku").WebElement("Dropdown User").Click
+		Browser("DPLK").Page("Laporan Pindah Buku").WebEdit("Field Search Dropdown").Click 
+		objkey.SendKeys DataTable.Value("USER",dtlocalsheet)
+		wait 2
+		objkey.SendKeys "{ENTER}"
+		wait 2
+	End If
+	
+	If DataTable.Value("JENIS_KLAIM",dtlocalsheet) <> "" Then
+		Browser("DPLK").Page("Laporan Pindah Buku").WebElement("Dropdown Jenis Klaim").Click
+		Browser("DPLK").Page("Laporan Pindah Buku").WebEdit("Field Search Dropdown").click 
+		objkey.SendKeys DataTable.Value("JENIS_KLAIM",dtlocalsheet)
+		wait 2
+		objkey.SendKeys "{ENTER}"
+		wait 2
+	End If
+	
+	If DataTable.Value("FORMAT_LAPORAN",dtlocalsheet) <> "" Then
+		Browser("DPLK").Page("Laporan Pindah Buku").WebElement("Dropdown Format Laporan").Click
+		Browser("DPLK").Page("Laporan Pindah Buku").WebEdit("Field Search Dropdown").Click
+		objkey.SendKeys  DataTable.Value("FORMAT_LAPORAN",dtlocalsheet)
+		wait 2
+		objkey.SendKeys "{ENTER}"
+		wait 2
+	End If
+	
+	Browser("DPLK").Page("Laporan Pindah Buku").WebEdit("Field Nama Peserta").Set DataTable.Value("NAMA_PESERTA",dtlocalsheet)
+	Browser("DPLK").Page("Laporan Pindah Buku").WebEdit("Field No Rek DPLK").Set DataTable.Value("NO_REK_DPLK",dtlocalsheet)
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Laporan Pindah Buku"),"Isi Field Yang Diperlukan Dan Tekan Cetak ", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	Browser("DPLK").Page("Laporan Pindah Buku").WebButton("Btn Cetak").Click
+	Call Login_Download()
+	wait 20
+End Sub
+
+REM ==== Laporan Kriling
+Sub Cetak_Laporan_Kliring
+	Set objkey = CreateObject("WScript.Shell")
+	If DataTable.Value("USER",dtlocalsheet) <> "" Then
+		Browser("DPLK").Page("Laporan Kliring").WebElement("Dropdown User").Click
+		Browser("DPLK").Page("Laporan Kliring").WebEdit("Field Search Dropdown").Click 
+		objkey.SendKeys DataTable.Value("USER",dtlocalsheet)
+		wait 2
+		objkey.SendKeys "{ENTER}"
+		wait 2
+	End If
+	
+	If DataTable.Value("FORMAT_LAPORAN",dtlocalsheet) <> "" Then
+		Browser("DPLK").Page("Laporan Kliring").WebElement("Dropdown Format Laporan").Click
+		Browser("DPLK").Page("Laporan Kliring").WebEdit("Field Search Dropdown").Click
+		objkey.SendKeys  DataTable.Value("FORMAT_LAPORAN",dtlocalsheet)
+		wait 2
+		objkey.SendKeys "{ENTER}"
+		wait 2
+	End If
+	Browser("DPLK").Page("Laporan Kliring").WebEdit("Field Nama Penerima").Set DataTable.Value("NAMA_PENERIMA",dtlocalsheet)
+	Browser("DPLK").Page("Laporan Kliring").WebEdit("Field NoRek Penerima").Set DataTable.Value("NO_REK_PENERIMA",dtlocalsheet)
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Laporan Kliring"),"Isi Field Yang Diperlukan Dan Tekan Cetak ", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	Browser("DPLK").Page("Laporan Kliring").WebButton("Btn Cetak").Click
+	Call Login_Download()
+	wait 20
+End Sub
+
+REM ==== Laporan Rekap Register
+Sub Cetak_Laporan_Rekap_Register
+	Set objkey = CreateObject("WScript.Shell")
+	If DataTable.Value("USER",dtlocalsheet) <> "" Then
+		Browser("DPLK").Page("Laporan Rekap Register").WebElement("Dropdown User").Click
+		Browser("DPLK").Page("Laporan Rekap Register").WebEdit("Field Search Dropdown").Click 
+		objkey.SendKeys DataTable.Value("USER",dtlocalsheet)
+		wait 2
+		objkey.SendKeys "{ENTER}"
+		wait 2
+	End If
+	
+	If DataTable.Value("CABANG",dtlocalsheet) <> "" Then
+		Browser("DPLK").Page("Laporan Rekap Register").WebElement("Dropdown Cabang").Click
+		Browser("DPLK").Page("Laporan Rekap Register").WebEdit("Field Search Dropdown").click 
+		objkey.SendKeys DataTable.Value("CABANG",dtlocalsheet)
+		wait 2
+		objkey.SendKeys "{ENTER}"
+		wait 2
+	End If
+	
+	If DataTable.Value("FORMAT_LAPORAN",dtlocalsheet) <> "" Then
+		Browser("DPLK").Page("Laporan Rekap Register").WebElement("Dropdown Format Laporan").Click
+		Browser("DPLK").Page("Laporan Rekap Register").WebEdit("Field Search Dropdown").Click
+		objkey.SendKeys  DataTable.Value("FORMAT_LAPORAN",dtlocalsheet)
+		wait 2
+		objkey.SendKeys "{ENTER}"
+		wait 2
+	End If
+	
+	If DataTable.Value("STATUS_PROSES",dtlocalsheet) <> "" Then
+		Browser("DPLK").Page("Laporan Rekap Register").WebElement("Dropdown Proses Status").Click
+		Browser("DPLK").Page("Laporan Rekap Register").WebEdit("Field Search Dropdown").Click
+		objkey.SendKeys  DataTable.Value("STATUS_PROSES",dtlocalsheet)
+		wait 2
+		objkey.SendKeys "{ENTER}"
+		wait 2
+	End If
+	
+	If DataTable.Value("TANGGAL_REGISTER",dtlocalsheet) <> "" Then
+		TanggalRegister = Replace(DataTable.Value("TANGGAL_REGISTER",dtlocalsheet)," ","")
+		TanggalRegister = Split(DataTable.Value("TANGGAL_REGISTER",dtlocalsheet),"-")
+		If ubound(TanggalRegister) + 1 = 2 Then
+			Browser("DPLK").Page("Laporan Rekap Register").WebEdit("Field Tanggal 1").Set Replace(TanggalRegister(0)," ","")
+			Browser("DPLK").Page("Laporan Rekap Register").WebEdit("Field Tanggal 2").Set Replace(TanggalRegister(1)," ","")
+		End If
+	End If
+	 
+	Browser("DPLK").Page("Laporan Rekap Register").WebEdit("Field Nama Peserta").Set DataTable.Value("NAMA_PESERTA",dtlocalsheet)
+	Browser("DPLK").Page("Laporan Rekap Register").WebEdit("Field No Peserta").Set DataTable.Value("NO_PESERTA",dtlocalsheet)
+
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Laporan Rekap Register"),"Isi Field Yang Diperlukan Dan Tekan Cetak ", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	Browser("DPLK").Page("Laporan Rekap Register").WebButton("Btn Cetak").Click
+	Call Login_Download()
+	wait 20
+End Sub
+

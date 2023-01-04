@@ -1,0 +1,259 @@
+﻿REM-----Login Filezilla
+Sub Login_Filezilla
+	Call spCloseProgram()
+	wait 5
+	Call spOpenProgram()
+	wait 5
+	
+	If Dialog("Check for Updates").Exist(2) Then
+		Dialog("Check for Updates").WinButton("Close").Click
+	End If
+	
+	wait 1
+	'Maximize window filezilla
+	If Window("FileZilla").Exist(5) Then
+		Window("FileZilla").Maximize
+		wait 1
+		Call CaptureImageUFTV2(Window("FileZilla"), "Membuka Aplikasi FTP Client (Filezilla)", " ", compatibilityMode.Desktop, ReportStatus.Passed)	
+	End If
+	wait 2
+	
+	Dim dtUsername, dtPassword, dtHostname
+	dtUsername 		= DataTable.Value("USERNAME", dtLocalsheet)
+	dtPassword		= DataTable.Value("PASSWORD", dtLocalsheet)
+	dtHostname		= DataTable.Value("HOSTNAME", dtLocalsheet)
+	
+'	Mengisi Field connection sesuai data di excel
+	Window("FileZilla").WinEdit("Hostname").Set dtHostname
+	Window("FileZilla").WinEdit("Username").Set dtUsername
+	Window("FileZilla").WinEdit("Password").Set dtPassword
+	wait 2
+		Call CaptureImageUFTV2(Window("FileZilla"), "Mengisi Field Connection ke Server Digisales", " ", compatibilityMode.Desktop, ReportStatus.Done)
+	wait 2
+		Window("FileZilla").WinButton("Btn Quickconnect").Click
+	wait 1
+		Call CaptureImageUFTV2(Window("Filezilla"), "Informasi Session Detail Sebelum Masuk ke Server", " ", compatibilityMode.Desktop, ReportStatus.Done)
+	wait 2
+		Dialog("certificate").WinButton("Btn Konfirmasi").Click
+	wait 1
+End Sub
+
+REM -------- Membuat SiteManager Baru untuk file upload di server
+Sub Create_SiteManager
+	Dim dtUsername, dtPassword, dtHostname
+	dtUsername 		= DataTable.Value("USERNAME", dtLocalsheet)
+	dtPassword		= DataTable.Value("PASSWORD", dtLocalsheet)
+	dtHostname		= DataTable.Value("HOSTNAME", dtLocalsheet)
+	
+	Set objKey 		= Createobject("Wscript.Shell")
+		objKey.SendKeys("^s")
+	wait 5
+		Dialog("Site Manager").WinButton("Btn New site").Click
+		objKey.SendKeys("FTPDigisales_FileDistribution")
+		objKey.SendKeys "{ENTER}"
+	wait 2
+	If Dialog("Cannot rename entry").WinButton("OK").Exist Then
+			Dialog("Cannot rename entry").WinButton("OK").Click
+		wait 1
+			Dialog("Site Manager").WinButton("Btn Delete").Click
+		wait 1
+			Dialog("Delete Site Manager entries").WinButton("Btn Yes").Click
+		wait 1
+			Dialog("Site Manager").WinTreeView("Select Site Manager").Click
+		wait 1
+			objKey.SendKeys "{DOWN}"
+		wait 1
+			Dialog("Site Manager").WinButton("Btn Delete").Click
+		wait 1
+			Dialog("Delete Site Manager entries").WinButton("Btn Yes").Click
+		wait 1
+			Dialog("Site Manager").WinButton("Btn New site").Click
+		wait 1
+			objKey.SendKeys("FTPDigisales_FileDistribution")
+		wait 1
+			objKey.SendKeys "{ENTER}"
+	End If
+		wait 2
+			Call CaptureImageUFTV2(Window("Filezilla"), "Masuk Kebagian New Site dan Beri Nama" & chr(34) & "FTPDigisales_FileDistribution" & chr(34), " ", compatibilityMode.Desktop, ReportStatus.Done)
+		wait 2
+			Dialog("Site Manager").WinComboBox("Dropdown Protocol").Click
+			objKey.SendKeys "{ENTER}"
+		wait 2
+			Dialog("Site Manager").WinEdit("Host").Set dtHostname
+		wait 2
+			Dialog("Site Manager").WinComboBox("Dropdown Encryption").Click
+			objKey.SendKeys "{DOWN 3}"
+			objKey.SendKeys "{ENTER}"
+		wait 2
+			Dialog("Site Manager").WinComboBox("Dropdown Logon Type").Click
+			objKey.SendKeys "{UP}"
+			objKey.SendKeys "{ENTER}"
+		wait 2
+			Dialog("Site Manager").WinEdit("User").Set dtUsername
+		wait 2
+			Dialog("Site Manager").WinEdit("Password").Set dtPassword
+		wait 2
+			Call CaptureImageUFTV2(Window("Filezilla"), "Isi Field Yang dibutuhkan", " ", compatibilityMode.Desktop, ReportStatus.Done)
+		wait 2
+			Dialog("Site Manager").WinButton("Btn Connect").Click
+		wait 2
+			Dialog("Site Manager - Cannot").WinButton("Btn OK").Click
+		wait 2
+			Dialog("Already connected").WinButton("btn OK").Click
+		wait 2 
+		if Dialog("Insecure FTP connection").WinButton("btn OK").Exist(5) then
+			Dialog("Insecure FTP connection").WinButton("btn OK").Click
+		End If
+End Sub
+
+REM -------- Upload File ke storage Server
+Sub UploadStorage
+	Dim tempDigisalesPath, tempDigisalesPath2, PathDigisales
+	Dim LocalSite, RemoteSite
+		
+	Set objSysInfo 		= Createobject("Wscript.Network")	
+	
+	tempDigisalesPath 	= Environment.Value("TestDir")
+	tempDigisalesPath2 	= InStrRev(tempDigisalesPath, "\")
+	PathDigisales 		= Left(tempDigisalesPath, tempDigisalesPath2)
+	
+	LocalSite			= PathDigisales & "File_Upload"
+	RemoteSite			= DataTable.Value("TEXT1", dtLocalsheet)
+	Filename			= DataTable.Value("TEXT2", dtLocalsheet)
+	
+	Set objKey 			= Createobject("Wscript.Shell")
+	'Set path local yang akan dibuat upload ke server
+	wait 2
+		Window("FileZilla").WinEdit("Local site").Set LocalSite
+		objKey.SendKeys "{ENTER}"
+	'Set path Server yang akan dijadikan tujuan untuk upload
+	wait 2
+		Window("FileZilla").WinEdit("Remote site").Set RemoteSite
+		objKey.SendKeys "{ENTER}"
+	wait 2
+	
+	'Mencari nama file pada local yang akan diupload ke server
+	If Window("FileZilla").WinListView("Local File").Exist(5) Then
+		Window("FileZilla").WinListView("Local File").Click
+	ElseIf Window("FileZilla").WinListView("Local File 2").Exist(5) Then
+		Window("FileZilla").WinListView("Local File 2").Click
+	ElseIf Window("FileZilla").WinObject("SysHeader32").Exist(5) Then 
+		Window("FileZilla").WinObject("SysHeader32").Click
+	End If
+	
+	wait 2
+		objKey.SendKeys("^f")
+		objKey.SendKeys(Filename)
+	wait 1
+	
+	If Window("FileZilla").WinListView("Local File").Exist(5) Then
+		Window("FileZilla").WinListView("Local File").Click
+	ElseIf Window("FileZilla").WinListView("Local File 2").Exist(5) Then
+		Window("FileZilla").WinListView("Local File 2").Click
+	ElseIf Window("FileZilla").WinObject("SysHeader32").Exist(5) Then 
+		Window("FileZilla").WinObject("SysHeader32").Click
+	End If
+	
+	'Upload File Ke Server
+	wait 2
+		objKey.SendKeys "{UP}"
+		objKey.SendKeys "{DOWN}"
+		objKey.SendKeys "+{F10}"
+	wait 1
+		Call CaptureImageUFTV2(Window("Filezilla"), "Upload File Yang Berekstensi .dat", " ", compatibilityMode.Desktop, ReportStatus.Done)
+	wait 1
+		objKey.SendKeys "{DOWN}"
+		objKey.SendKeys "{ENTER}"
+	wait 1
+	
+	If Dialog("Target file already exists").Exist(2) Then
+		Dialog("Target file already exists").WinButton("Btn OK").Click
+	End If
+	wait 1
+	'Cek notif jika berhasil upload ke server
+	If Window("Window").WinObject("Notif").Exist(1) Then
+		Window("Window").WinObject("Notif").Click
+	End If
+	
+	wait 2
+		Call CaptureImageUFTV2(Window("Filezilla"), "File Berhasil Di Upload ke Server", " ", compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2	
+End Sub
+
+REM ----- Download File dari Server Digisales
+Sub DownloadFile
+	Set objkey = CreateObject("WScript.Shell")
+	
+	Dim remoteSite, fileName
+	remoteSite	= DataTable.Value("TEXT1", dtLocalsheet)
+	fileName	= DataTable.Value("TEXT2", dtLocalsheet)
+	
+	'Masuk ke storage /BNIMultifinance/in/archive pada server digisales
+	Window("FileZilla").WinEdit("Remote site").Set remoteSite
+	wait 1
+	objkey.SendKeys "{ENTER}"
+	wait 2
+		Call CaptureImageUFTV2(Window("Filezilla"), "Masuk ke storage server /BNIMultifinance/in/archive", " ", compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	
+	'Klik List Remote File
+	If Window("FileZilla").WinListView("Remote File").Exist(5) Then
+		Window("FileZilla").WinListView("Remote File").Click
+	End If
+	
+	'Mencari file yang akan didownload
+	wait 1
+	objKey.SendKeys("^f")
+	objkey.SendKeys(fileName)
+	wait 1
+	
+	'Klik List Remote File
+	If Window("FileZilla").WinListView("Remote File").Exist(5) Then
+		Window("FileZilla").WinListView("Remote File").Click
+	End If
+	
+	'Download File dari Server digisales
+	wait 1
+		objKey.SendKeys "{UP}"
+		objKey.SendKeys "{DOWN}"
+		objKey.SendKeys "+{F10}"
+	wait 2
+		Call CaptureImageUFTV2(Window("Filezilla"), "Klik Download untuk mengunduh file BNIMF", " ", compatibilityMode.Desktop, ReportStatus.Done)
+	wait 2
+		objKey.SendKeys "{DOWN}"
+		objKey.SendKeys "{ENTER}"
+	wait 1
+	
+	If Dialog("Target file already exists").Exist(2) Then
+		Dialog("Target file already exists").WinButton("Btn OK").Click
+	End If
+	
+	wait 1
+	
+	'Cek Notifikasi berhasil download
+	If Window("Window").WinObject("Notif").Exist(1) Then
+		Window("Window").WinObject("Notif").Click
+	End If
+	
+	wait 1
+		Call CaptureImageUFTV2(Window("Filezilla"), "File Berhasil Di Download dari Server", " ", compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	
+End Sub
+
+'Fungsi buka aplikasi
+Function spOpenProgram()
+	OpenProgram2		= DataTable.Value ("PROGRAM2", dtGlobalSheet)
+	program_path2		= DataTable.Value ("PROGRAM_PATH2", dtGlobalSheet)
+
+	InvokeApplication(program_path2 & "/" & openprogram2 & ".exe")
+
+End Function
+
+'Fungsi tutup aplikasi
+Function spCloseProgram()
+	CloseProgram		= DataTable.Value ("PROGRAM2", dtGlobalSheet)
+	SystemUtil.CloseProcessByName CloseProgram &".exe"
+End Function
+
+

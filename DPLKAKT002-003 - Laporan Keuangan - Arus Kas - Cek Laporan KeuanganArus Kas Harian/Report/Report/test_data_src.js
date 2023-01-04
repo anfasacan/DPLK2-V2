@@ -1,0 +1,1 @@
+﻿var __testDataSource={items:[{dataFilePath:'Default.xlsx',dataFileFormat:'excel',dataFileFolder:'C:\\Users\\1442\\Desktop\\DPLK 2\\DPLKAKT002-003 - Laporan Keuangan - Arus Kas - Cek Laporan KeuanganArus Kas Harian\\Report',namePairs:[]}]};

@@ -1,0 +1,363 @@
+﻿Public GlobalRowIndex
+Dim testCaseName
+testCaseName = Environment("TestName")
+
+'REM ------ Untuk ambil file excel untuk membaca datatable
+Function fnGetDataTable(byval filename)
+
+	Dim fullpath, objSysInfo, fso
+	Dim tempDPLKPath, tempDPLKPath2, PathDPLK
+	
+	Set fullpath 	= Createobject("Wscript.Network")
+	Set objSysInfo 	= Createobject("Wscript.Network")	
+	
+	tempDPLKPath 	= Environment.Value("TestDir")
+	tempDPLKPath2 	= InStrRev(tempDPLKPath, "\")
+	PathDPLK		 = Left(tempDPLKPath, tempDPLKPath2)
+	
+	fullpath	= PathDPLK & "Lib_Repo_Excel\FileExcel_DPLK\"& filename
+	
+	fnGetDataTable = fullpath
+	Set fso = CreateObject("Scripting.FileSystemObject")
+	
+	If Not fso.FileExists(fullpath) Then
+		Reporter.ReportEvent micWarning, "Source Data is not exist", fullpath
+		Call ExitTest()
+	End If
+End Function
+
+Sub spInitiateData(byval globalData, byval localData, ByVal sheetName)
+REM ------ INITIATE EXCEL FILE
+	On Error Resume Next
+	Dim tempSheet
+	Set tempSheet = DataTable.GetSheet("TEMPORARY")
+	If tempSheet Is Nothing Then
+		DataTable.AddSheet("TEMPORARY")
+		DataTable.AddSheet("DPLKDBConfig")
+		
+		Dim dtLogin, dtMerchant, dtDBConfig
+		
+		dtLogin 	= fnGetDataTable(globalData)
+		Call DataTable.ImportSheet(dtLogin, "Global","Global")
+	
+		dtMerchant = fnGetDataTable(localData)
+		Call DataTable.ImportSheet(dtMerchant, sheetName, dtLocalSheet)
+		
+		dtDBConfig	= fnGetDataTable("DPLK_DB_Config.xlsx")
+		Call DataTable.ImportSheet(dtDBConfig, "DPLKDBConfig", "DPLKDBConfig")
+	End If
+	On Error GoTo 0
+End Sub
+
+REM -- Sub yang terintegrate dengan excel untuk menjalankan script
+Function fnRunningIterator()
+	If CInt(Environment("ActionIteration")) = CInt(DataTable.LocalSheet.GetRowCount()) Then '== 4
+		If Trim(DataTable.Value("RUN", dtLocalSheet)) = "" Then 'Statenya ga run
+			spReportForceSave() 'Save
+			ExitActionIteration()
+			Exit Function	
+		End If
+	End If
+	
+	If Trim(DataTable.Value("RUN", dtLocalSheet)) = "" Then 'Statenya ga run
+		ExitActionIteration()
+		Exit Function	
+	End If
+End Function
+
+REM ===================== Sub untuk membuka browser dengan parameter pertama browser (lihat di taskmanager terkait browser apa yg digunakan, cth: internet explorer = iexplore.exe), parameter kedua url tujuan
+Function spOpenBrowser(Openbrowser, url)
+	oBrowser = LCase(Openbrowser)
+	SystemUtil.CloseProcessByName oBrowser &".exe"		
+	SystemUtil.Run oBrowser, url, , , 3
+	wait 2	
+End Function
+
+Function spOpenProgram()
+	OpenProgram		= DataTable.Value ("PROGRAM", dtGlobalSheet)
+	program_path	= DataTable.Value ("PROGRAM_PATH", dtGlobalSheet)
+	
+'	oShellSet oShell = CreateObject ("Wscript.shell")
+'	oShell.run program_path & "/" & openprogram & ".exe"
+
+	InvokeApplication(program_path & "/" & openprogram & ".exe")
+	
+
+End Function
+
+Sub spLoadingScreenLogin()
+	Set objkey = CreateObject("WScript.Shell")
+'	Do
+	wait 5
+	objkey.SendKeys "{F6}"
+	wait 1
+'	objkey.SendKeys DataTable.Value ("URL", dtGlobalSheet)
+'	wait 1
+	objkey.SendKeys "{ENTER}"
+	wait 10
+	objkey.SendKeys "{F5}"
+'	Loop until Browser("DPLK").Page("Login").WebEdit("Field Username").Exist(5)
+End Sub
+
+Function spReportInitiate()
+	Dim author, tester, shortDescHeader, shortDescBody
+	Dim projectType, projectName, projectCode
+	Dim coverTitle, coverSubTitle
+	Dim Tester1, Tester2, TestManager, TestingGroupHead, DevelopmentManager, RequirementManager, ProjectManager
+	
+	author					= DataTable.Value ("AUTHOR", dtGlobalSheet)
+	shortDescHeader		= DataTable.Value ("HEADER_DESCRIPTION", dtGlobalSheet)
+	shortDescBody			= DataTable.Value ("HEADER_BODY", dtGlobalSheet)
+	
+	projectType				= DataTable.Value ("PROJECT_TYPE", dtGlobalSheet)
+	projectName			= DataTable.Value ("PROJECT_NAME", dtGlobalSheet)
+	projectCode				= DataTable.Value ("PROJECT_CODE", dtGlobalSheet)
+		
+	coverTitle				= DataTable.Value ("COVER_TITLE", dtGlobalSheet)
+	coverSubTitle			= DataTable.Value ("COVER_SUBTITLE", dtGlobalSheet)
+	
+	Tester1					= DataTable.Value ("TESTER1", dtGlobalSheet)
+	Tester2					= DataTable.Value ("TESTER2", dtGlobalSheet)
+	TestManager				= DataTable.Value ("TEST_MANAGER", dtGlobalSheet)
+	TestingGroupHead		= DataTable.Value ("TESTING_GROUPHEAD", dtGlobalSheet)
+	DevelopmentManager	= DataTable.Value ("DEVELOPMENT_MANAGER", dtGlobalSheet)
+	RequirementManager	= DataTable.Value ("REQUIREMENT_MANAGER", dtGlobalSheet)
+	ProjectManager			= DataTable.Value ("PROJECT_MANAGER", dtGlobalSheet)
+	
+	REM ------------ Initiated Report Library
+	Call spInitiateReport("Prepared By " & author, author, shortDescHeader, shortDescBody, "Reporting DPLK")
+	Call spInitiateReportProject(projectType, projectName, projectCode)
+	Call spInitiateReportCover(coverTitle, coverSubTitle)
+	Call spInitiateReportSigner(Tester1, Tester2, TestManager, TestingGroupHead, DevelopmentManager, RequirementManager, ProjectManager)
+	Call spInitiateReportAttributes()
+'	Call spInitiateReportBusinessRequirements()
+' 	Call spInitiateReportSystemImpacted()
+'	Call spInitiateReportSystemChanges()
+End Function
+REM---------------------------Buka aplikasi dekstop
+Function DA_OpenProgram()
+	Dim Openprogram
+	Openprogram		= DataTable.Value ("PROGRAM", dtGlobalSheet)
+	
+	Call spOpenBrowser(Openprogram)
+	Call spLoadingScreenLogin()
+
+'	Call Da_LoginDetail()
+End Function
+
+REM ------------------- LOGIN FOR OPEN WEB DPLK BROWSER GENERAL
+Function DA_Login()
+	Dim Openbrowser, url
+	Openbrowser	= DataTable.Value ("BROWSER", dtGlobalSheet)
+	url			= DataTable.Value ("URL", dtGlobalSheet)
+	
+	Call spOpenBrowser(Openbrowser, url)
+	Call spLoadingScreenLogin()
+
+	Call Da_LoginDetail()
+End Function
+
+REM ---------------------------- USER DPLK LOGIN GENERAL ------------------------------------
+Function DA_LoginDetail()
+	Dim dtLoginUsername, dtLoginPassword
+	
+	dtLoginUsername		= DataTable.Value("USERID", dtLocalsheet)
+	dtLoginPassword		= DataTable.Value("PASSWORD", dtLocalsheet)
+	iMaxLimit = 100
+	
+	REM -------------------- LOGIN DPLK -------------------------------------
+	Browser("DPLK").Page("Login").WebEdit("Field Username").Set dtLoginUsername
+	Browser("DPLK").Page("Login").WebEdit("Field Password").Set dtLoginPassword
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Login"), "Input Data Login", "UserID: " & dtLoginUsername , compatibilityMode.Desktop, ReportStatus.Done)
+	wait 2
+	Browser("DPLK").Page("Login").WebButton("Btn Login").Click
+	If Browser("DPLK").Page("Login").WebElement("Alert Invalid UserName or Password").Exist(10) Then
+		wait 2
+		Reporter.ReportEvent micFail, "Core Mati", "Gagal Masuk Ke Dashboard DPLK"
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Login"), " Gagal Masuk ke Homepage DPLK", " " , compatibilityMode.Desktop, ReportStatus.Failed)
+		Call CloseBrowser()
+		Call spReportSave()
+		Call ExitActionIteration()
+	End If
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Login"), "Login Berhasil", " ", compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	If Browser("DPLK").Page("Dashboard").WebElement("Alert Notifikasi").Exist(5) Then
+		Browser("DPLK").Page("Dashboard").WebButton("Btn OK").Click
+	End If
+End Function
+
+
+
+REM -------- Open Lasted Download File
+Sub OpenLastDownloadFile
+	Set objNet = CreateObject("WScript.NetWork")
+	Set FSO = CreateObject("Scripting.FileSystemObject")
+	Set objShell = CreateObject("WScript.Shell")
+	Set Folder = FSO.GetFolder("C:\Users\" & objNet.UserName & "\Downloads\")
+	
+	LatestModifiedFileDate = #1/1/0001#
+	For Each File In Folder.Files
+	    If  File.DateLastModified > LatestModifiedFileDate Then
+	        LatestModilfiedFile= File.Name
+	        LatestModifiedFileDate = File.DateLastModified
+	    End If
+	Next
+	
+	File_Path = "C:\Users\" & objNet.UserName & "\Downloads\" & LatestModilfiedFile
+	SystemUtil.Run (File_Path)
+	wait 10
+	wait 2
+	Call CaptureImageUFTV2(Window("SS_Full_Screen"),"Berikut File Yang Digunakan", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	
+
+	
+End Sub
+
+REM -------- Open Last Download File Without Closing The Browser
+Sub OpenLastDownloadFileNoClose(FileName, AppName)
+	
+End Sub
+REM -------- Open file
+Function OpenFile(Path , FileName, AppName)
+	
+End Function
+
+REM ------------------- LOGIN FOR OPEN WEB BROWSER SUPER DPLK
+Function DA_OpenBrowserSuperDPLK()
+	Dim Openbrowser, url
+	Openbrowser		= DataTable.Value ("BROWSER", dtGlobalSheet)
+	url				= DataTable.Value ("URL_DPLKINDIVIDU", dtGlobalSheet)
+	
+	Call spOpenBrowser(Openbrowser, url)
+	Call spLoadingScreenLogin()
+End Function
+
+
+REM ---------------------------- USER DPLK LOGOUT ------------------------------------
+Sub captureError()
+	If Browser("DPLK").Page("Login").WebElement("Login").Exist(5) Then
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Login"), "General Error", " ", compatibilityMode.Desktop, ReportStatus.Failed)
+	ElseIf Browser("DPLK").Page("Dashboard").Image("Profile").Exist(5) Then		
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Dashboard"), "General Error", " ", compatibilityMode.Desktop, ReportStatus.Failed)
+	End If
+	
+End Sub
+
+Function DA_Logout(ByVal isError)
+	If isError = "1" Then
+		Call captureError()
+	End If
+
+	wait 1
+	If Browser("DPLK").Page("Dashboard").Image("Profile").Exist(10) Then
+		Browser("DPLK").Page("Dashboard").Image("Profile").Click
+		wait 2
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Dashboard"), "Klik Button Logout", " ", compatibilityMode.Desktop, ReportStatus.Done)
+		wait 2
+		Browser("DPLK").Page("Dashboard").WebButton("Btn Logout").Click
+
+		If Browser("DPLK").Page("Login").WebElement("Login").Exist(30) Then
+			Call CaptureImageUFTV2(Browser("DPLK").Page("Login"),"Berhasil Logout", " ", compatibilityMode.Desktop, ReportStatus.Passed)
+'			Call CloseBrowser()
+			Call spReportSave()
+	
+		If isError = "1" Then
+			If chr(Environment("TestIteration")) = chr(DataTable.GetRowCount) Then
+				Call spReportSave()
+				Call ExitActionIteration()
+			Else
+				Call ExitActionIteration()
+			End If
+		End If	
+	Else 
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Login"), "Logout Failed", " ", compatibilityMode.Desktop, ReportStatus.Failed)
+		Reporter.ReportEvent micFail, "Logout error", "Logout error"
+		Call spReportSave()
+		Call CloseBrowser()
+		Call ExitActionIteration()
+	End If
+Else 
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Login"), "Logout Failed", " ", compatibilityMode.Desktop, ReportStatus.Failed)
+	Reporter.ReportEvent micFail, "Logout Gagal", "Logout Gagal"
+	Call spReportSave()
+	Call CloseBrowser()
+	Call ExitActionIteration()
+End  If
+End Function
+
+Sub AC_Change_Role
+	Dim Role
+	Role = DataTable.Value("MAIN_SIDEBAR",dtlocalsheet)
+	Browser("DPLK").Page("Sidebar").WebButton("Role").Click
+	Browser("DPLK").Page("Sidebar").Link("Role Name").SetTOProperty "text", Role
+	Browser("DPLK").Page("Sidebar").Link("Role Name").Click
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Sidebar").WebButton("Role"),"Ubah Role Menu Menjadi " & Role, " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+End Sub
+
+Sub AC_GoTo_Menu
+	Dim Main_Menu,Sub_Menu,Sub_Sub_Menu
+	Role = ucase(DataTable.Value("MAIN_SIDEBAR",dtlocalsheet))
+	Main_Menu = DataTable.Value("SIDEBAR_MENU",dtlocalsheet)
+	Sub_Menu = DataTable.Value("SIDEBAR_SUBMENU",dtlocalsheet)
+	Sub_Sub_Menu = DataTable.Value("SIDEBAR_SUBMENU_SUBMENU",dtlocalsheet)
+	Cek_Index_Sub_Menu = Split(Sub_Menu,",")
+	Cek_Index_Main_Menu = Split(Main_Menu,",")
+	
+	If UBound(Cek_Index_Main_Menu) + 1 = 2 Then
+		Browser("DPLK").Page("Sidebar").Link("Menu " & Role).SetTOProperty "text", Cek_Index_Main_Menu(0)
+		Browser("DPLK").Page("Sidebar").Link("Menu " & Role).SetTOProperty "index", Cek_Index_Main_Menu(1)	
+	else
+		Browser("DPLK").Page("Sidebar").Link("Menu " & Role).SetTOProperty "text", Main_Menu	
+	End If
+	Browser("DPLK").Page("Sidebar").Link("Menu " & Role).Click
+
+
+	If Sub_Menu <> "" Then
+		If ubound(Cek_Index_Sub_Menu) + 1 = 2 Then
+			Browser("DPLK").Page("Sidebar").Link("Sub Menu").SetTOProperty "text", Cek_Index_Sub_Menu(0)
+			Browser("DPLK").Page("Sidebar").Link("Sub Menu").SetTOProperty "index", Cek_Index_Sub_Menu(1)
+		else
+			Browser("DPLK").Page("Sidebar").Link("Sub Menu").SetTOProperty "text", Sub_Menu	
+		End If	
+		Browser("DPLK").Page("Sidebar").Link("Sub Menu").Click
+		
+		If Sub_Sub_Menu <> "" Then
+			Browser("DPLK").Page("Sidebar").Link("Sub Sub Menu").SetTOProperty "text", Sub_Sub_Menu	
+			If not Browser("DPLK").Page("Sidebar").Link("Sub Sub Menu").Exist(2) Then
+				Browser("DPLK").Page("Sidebar").Link("Sub Menu").Click
+			End If
+			Browser("DPLK").Page("Sidebar").Link("Sub Sub Menu").Click
+		End If
+	End If
+	
+	If Sub_Sub_Menu <> "" Then
+		wait 2
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Sidebar"),"Masuk Sub Sub Menu", "Menu Yang Dituju : " & Sub_Sub_Menu & " Dalam Sub Menu " & Sub_Menu,  compatibilityMode.Desktop, ReportStatus.Passed)
+		wait 2
+	ElseIf Sub_Menu <> "" Then
+		If ubound(Cek_Index_Sub_Menu) + 1 = 2 Then
+			wait 2
+			Call CaptureImageUFTV2(Browser("DPLK").Page("Sidebar"),"Masuk Sub Menu", "Menu Yang Dituju :  " & Cek_Index_Sub_Menu(0),  compatibilityMode.Desktop, ReportStatus.Passed)
+			wait 2
+		else
+			wait 2
+			Call CaptureImageUFTV2(Browser("DPLK").Page("Sidebar"),"Masuk Sub Menu", "Menu Yang Dituju :  " & Sub_Menu,  compatibilityMode.Desktop, ReportStatus.Passed)
+			wait 2
+		End If	
+		
+		
+	Else msgbox "Menu Tidak Ada"
+	End If
+End Sub
+
+
+
+Sub RefreshPage
+	Set objkey = CreateObject("WScript.Shell")
+	objkey.SendKeys "{F5}"
+	wait 5
+End Sub

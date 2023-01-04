@@ -1,0 +1,98 @@
+﻿REM ==== Setup Klaim Status
+Sub Tambah_Transaksi_Register_Cari_Peserta
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Register Klaim").WebButton("Btn Tambah"),"Tekan Button Tambah", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	
+	Browser("DPLK").Page("Register Klaim").WebButton("Btn Tambah").Click
+	
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Register Klaim"),"Pilih Jenis Register Klaim", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	
+	If ucase(DataTable.Value("JENIS_REGISTER",dtlocalsheet)) = "PENUTUPAN" Then
+		Browser("DPLK").Page("Register Klaim").WebButton("Btn Penutupan").Click
+	ElseIf ucase(DataTable.Value("JENIS_REGISTER",dtlocalsheet)) = "PENARIKAN" Then
+		Browser("DPLK").Page("Register Klaim").WebButton("Btn Penarikan").Click
+	End If
+	
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Register Klaim"),"Masuk Menu Tambah Data ", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	
+	Browser("DPLK").Page("Register Klaim").WebButton("Btn Cari Peserta").Click
+	
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Register Klaim"),"Masuk Menu Cari Peserta, dan Pilih Peserta", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	
+	Browser("DPLK").Page("Register Klaim").WebEdit("Field Search").Set DataTable.Value("ID_PESERTA",dtlocalsheet)
+	wait 5
+	Browser("DPLK").Page("Register Klaim").WebElement("Table Index 1").SetTOProperty "innertext", DataTable.Value("ID_PESERTA",dtlocalsheet)
+	Browser("DPLK").Page("Register Klaim").WebElement("Table Index 1").Click 
+	
+
+End Sub
+
+Sub Check_Dialog_Pop_Up
+	If Browser("DPLK").DialogExists() Then
+		wait 2
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Register Klaim"), Browser("DPLK").GetDialogText() , " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+		wait 4
+		Browser("DPLK").HandleDialog micOK
+		wait 3
+	End If
+End Sub
+
+Sub Tambah_Transaksi_Register_Isi_Dokumen_Klaim
+	Set objkey = CreateObject("WScript.Shell")
+	File_Batch = split(DataTable.Value("DOKUMEN_KLAIM_ID_BATCH",dtlocalsheet),",")
+	File = "C:\Users\1442\Desktop\DPLK 2\File Upload\File_Pdf.pdf"
+	For Iterator = 0 To UBound(File_Batch) Step 1
+		Select Case File_Batch(iterator)
+			Case 1
+				Browser("DPLK").Page("Register Klaim").WebFile("File 1 Surat Kuasa Pencairan Bermaterai Cukup").set File
+			Case 2
+				Browser("DPLK").Page("Register Klaim").WebFile("File 2 ID Peserta").set File
+			Case 3
+				Browser("DPLK").Page("Register Klaim").WebFile("File 3 Bukti Kepesertaan (Buku Asli Simponi atau e-Card)").set File
+			Case 4
+				Browser("DPLK").Page("Register Klaim").WebFile("File 4 NPWP").set File
+			Case 5
+				Browser("DPLK").Page("Register Klaim").WebFile("File 5 Cover Tabungan (Rekening Tujuan Pencairan)").set File
+			Case 6
+				Browser("DPLK").Page("Register Klaim").WebFile("File 6 SK Pensiun / Berhenti Bekerja").set File
+			Case 7
+				Browser("DPLK").Page("Register Klaim").WebFile("File 7 Kartu Keluarga").set File
+			Case 8
+				Browser("DPLK").Page("Register Klaim").WebFile("File 8 Formulir Pencairan Dana BNI Simponi").set File
+			Case 9
+				Browser("DPLK").Page("Register Klaim").WebFile("File 9 Surat Penunjukkan Asuransi Jiwa untuk Benefit Anuitas").set File
+			Case 10
+				Browser("DPLK").Page("Register Klaim").WebFile("File 10 Surat Konfirmasi dari Perusahaan Asuransi Jiwa untuk Benefit Anuitas").set File
+		End Select	
+		wait 10
+'		objkey.SendKeys file
+'		wait 3
+'		objkey.SendKeys "{ENTER}"
+'		wait 5
+	Next
+	wait 2
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Register Klaim"),"Upload Dokumen - Dokumen Yang Diperlukan", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+End Sub
+
+Sub Check_Notification_Simpan_Draft
+	Browser("DPLK").Page("Register Klaim").WebButton("Btn Simpan Draft").Click
+	If Browser("DPLK").Page("Register Klaim").WebElement("Notifikasi").Exist(0.5) Then
+		TextNotif = Browser("DPLK").Page("Register Klaim").WebElement("Notifikasi").GetROProperty("innertext")
+		wait 2
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Register Klaim"),mid(TextNotif,2,len(TextNotif)-1), " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+		wait 2
+	ElseIf Browser("DPLK").Page("Register Klaim").WebElement("Notifikasi 2").Exist(0.5) Then
+		TextNotif = Browser("DPLK").Page("Register Klaim").WebElement("Notifikasi 2").GetROProperty("innertext")
+		wait 2
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Register Klaim"),TextNotif, " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+		wait 2
+	End If
+End Sub

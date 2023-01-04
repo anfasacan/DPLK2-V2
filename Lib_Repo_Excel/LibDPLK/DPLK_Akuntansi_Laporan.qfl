@@ -1,0 +1,77 @@
+﻿REM ==== Login To Download
+Sub Login_Download()
+	Set objkey = CreateObject("WScript.Shell")
+	Set PasteData = CreateObject("Mercury.Clipboard")
+'	objkey.SendKeys ("^{TAB}")
+	wait 3
+	objkey.SendKeys "{F6}"
+	wait 2
+	objkey.SendKeys "^c"
+	wait 2
+	objkey.SendKeys "{ESC}"
+	Link_URL = PasteData.GetText
+	PasteData.SetText ""
+	If instr(1,Link_URL, "192.168.132.153") <> 0 or InStr(1,Link_URL,"192.168.132.155") Then
+		objkey.SendKeys("DPLKCORERPTDEV\user_rpt")
+		wait 1
+		objkey.SendKeys "{TAB}"
+		wait 1
+		objkey.SendKeys "dplkbni1234/"
+		wait 1
+		objkey.SendKeys "{ENTER}"
+	End If
+End Sub
+
+REM ====== Laporan Keuangan
+Sub Cetak_Laporan_Keuangan
+	Set objkey = CreateObject("WScript.Shell")
+	
+	Browser("DPLK").Page("Laporan Keuangan").WebElement("Dropdown Mata Uang").Click
+	wait 2
+	objkey.SendKeys DataTable.Value("MATA_UANG",dtlocalsheet)
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	
+	Browser("DPLK").Page("Laporan Keuangan").WebElement("Dopdown Jenis Laporan").Click
+	wait 2
+	objkey.SendKeys DataTable.Value("JENIS_LAPORAN",dtlocalsheet)
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	
+	Browser("DPLK").Page("Laporan Keuangan").WebElement("Dropdown Nama Laporan").Click
+	wait 2
+	objkey.SendKeys DataTable.Value("NAMA_LAPORAN",dtlocalsheet)
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	
+	Browser("DPLK").Page("Laporan Keuangan").WebElement("Dropdown Status Posting").Click
+	wait 2
+	objkey.SendKeys DataTable.Value("STATUS_POSTING",dtlocalsheet)
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	
+	Browser("DPLK").Page("Laporan Keuangan").WebElement("Dropdown Tipe Laporan").Click
+	wait 2
+	objkey.SendKeys DataTable.Value("TIPE_LAPORAN",dtlocalsheet)
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	
+	
+	
+	Browser("DPLK").Page("Laporan Keuangan").WebEdit("Field Tanggal Pembanding").Set DataTable.Value("TANGGAL_PEMBANDING",dtlocalsheet)
+	Browser("DPLK").Page("Laporan Keuangan").WebEdit("Field Tanggal Transaksi").Set DataTable.Value("TANGGAL_TRANSAKSI",dtlocalsheet)
+	Browser("DPLK").Page("Laporan Keuangan").WebEdit("Field Tanggal Awal Pembanding").Set DataTable.Value("TANGGAL_PEMBANDING",dtlocalsheet)
+	Browser("DPLK").Page("Laporan Keuangan").WebEdit("Field Tanggal Akhir Pembanding").Set DataTable.Value("TANGGAL_PEMBANDING",dtlocalsheet)
+	Browser("DPLK").Page("Laporan Keuangan").WebEdit("Field Tanggal Akhir Transaksi").Set DataTable.Value("TANGGAL_TRANSAKSI",dtlocalsheet)
+	Browser("DPLK").Page("Laporan Keuangan").WebEdit("Field Tanggal Awal Transaksi").Set DataTable.Value("TANGGAL_TRANSAKSI",dtlocalsheet)
+
+	
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Laporan Keuangan"),"Isi/Ubah Field Yang Diperlukan Dan Tekan Cetak ", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	
+	Browser("DPLK").Page("Laporan Keuangan").WebButton("Btn Cetak").Click
+	wait 2
+	Call Login_Download()
+	wait 20
+End Sub

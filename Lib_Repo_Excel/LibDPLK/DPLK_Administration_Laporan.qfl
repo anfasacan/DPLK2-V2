@@ -1,0 +1,36 @@
+﻿Sub View_Laporan_Administration_Log_Audit_Trail
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Log Audit Trail").WebElement("Btn View"),"Tekan Button View ", " ",  compatibilityMode.Desktop, ReportStatus.Done)
+	wait 2
+	Browser("DPLK").Page("Log Audit Trail").WebElement("Btn View").Click
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Log Audit Trail"),"Masuk Ke Menu View Dan Tekan Kembali ", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	Browser("DPLK").Page("Log Audit Trail").WebButton("Btn Kembali").Click
+End Sub
+
+Sub Download_Custom_Report
+	Set objkey = CreateObject("WScript.Shell")
+	
+	Browser("DPLK").Page("Custom Report").WebElement("Dropdown Table").Click
+	wait 2
+	objkey.SendKeys DataTable.Value("NAMA_TABEL",dtlocalsheet)
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	wait 2
+	
+	If ucase(DataTable.Value("NAMA_TABEL",dtlocalsheet)) = "ALL" or ucase(DataTable.Value("NAMA_TABEL",dtlocalsheet)) = "SEMUA" Then
+		
+	else
+		
+	End If
+	
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Custom Report"),"Pilih Tabel Dan Masukan Inputan Yang Dibutuhkan ", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Custom Report").WebButton("Btn Download"),"Tekan Button Download", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	Browser("DPLK").Page("Custom Report").WebButton("Btn Download").Click
+	wait 10
+End Sub

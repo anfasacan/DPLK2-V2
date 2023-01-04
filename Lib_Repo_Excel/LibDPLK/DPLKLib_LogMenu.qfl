@@ -1,0 +1,44 @@
+﻿Sub Check_Log_Website(Action)
+
+	Role = "Administration"
+	Browser("DPLK").Page("Sidebar").WebButton("Role").Click
+	Browser("DPLK").Page("Sidebar").Link("Role Name").SetTOProperty "text", Role
+	Browser("DPLK").Page("Sidebar").Link("Role Name").Click
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Sidebar").WebButton("Role"),"Ubah Role Menu Menjadi " & Role, " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2	
+	Dim Main_Menu,Sub_Menu,Sub_Sub_Menu
+	Main_Menu = "Laporan"
+	Sub_Menu = "Log Audit Trail"
+	Sub_Sub_Menu = ""
+	Browser("DPLK").Page("Sidebar").Link("Main Menu").SetTOProperty "text", Main_Menu
+	Browser("DPLK").Page("Sidebar").Link("Main Menu").Click
+	
+	If Sub_Menu <> "" Then
+		Browser("DPLK").Page("Sidebar").Link("Sub Menu").SetTOProperty "text", Sub_Menu
+		Browser("DPLK").Page("Sidebar").Link("Sub Menu").Click
+		
+		If Sub_Sub_Menu <> "" Then
+			
+		End If
+	End If
+	
+	If Sub_Sub_Menu <> "" Then
+		wait 2
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Sidebar"),"Masuk Sub Sub Menu", "Menu Yang Dituju : " & Sub_Sub_Menu & " Dalam Sub Menu " & Sub_Menu,  compatibilityMode.Desktop, ReportStatus.Passed)
+		wait 2
+	ElseIf Sub_Menu <> "" Then
+		wait 2
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Sidebar"),"Masuk Sub Menu", "Menu Yang Dituju :  " & Sub_Menu,  compatibilityMode.Desktop, ReportStatus.Passed)
+		wait 2
+	Else msgbox "Menu Tidak Ada"
+	End If
+	wait 5
+	
+	Browser("DPLK").Page("Log Audit Trail").WebEdit("Field Date").Set Date()
+	Browser("DPLK").Page("Log Audit Trail").WebEdit("Field Action").Set Action
+	Browser("DPLK").Page("Log Audit Trail").WebEdit("Field Menu Name").Set DataTable.Value("SIDEBAR_SUBMENU",dtlocalsheet)
+	wait 10
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Log Audit Trail"),"Berikut Log Pada " & DataTable.Value("SIDEBAR_SUBMENU",dtlocalsheet), " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2	
+End Sub
