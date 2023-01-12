@@ -354,10 +354,139 @@ Sub AC_GoTo_Menu
 	End If
 End Sub
 
+Sub AC_GoTo_Menu_No_SS
+	Dim Main_Menu,Sub_Menu,Sub_Sub_Menu
+	Role = ucase(DataTable.Value("MAIN_SIDEBAR",dtlocalsheet))
+	Main_Menu = DataTable.Value("SIDEBAR_MENU",dtlocalsheet)
+	Sub_Menu = DataTable.Value("SIDEBAR_SUBMENU",dtlocalsheet)
+	Sub_Sub_Menu = DataTable.Value("SIDEBAR_SUBMENU_SUBMENU",dtlocalsheet)
+	Cek_Index_Sub_Menu = Split(Sub_Menu,",")
+	Cek_Index_Main_Menu = Split(Main_Menu,",")
+	
+	If UBound(Cek_Index_Main_Menu) + 1 = 2 Then
+		Browser("DPLK").Page("Sidebar").Link("Menu " & Role).SetTOProperty "text", Cek_Index_Main_Menu(0)
+		Browser("DPLK").Page("Sidebar").Link("Menu " & Role).SetTOProperty "index", Cek_Index_Main_Menu(1)	
+	else
+		Browser("DPLK").Page("Sidebar").Link("Menu " & Role).SetTOProperty "text", Main_Menu	
+	End If
+	Browser("DPLK").Page("Sidebar").Link("Menu " & Role).Click
+
+
+	If Sub_Menu <> "" Then
+		If ubound(Cek_Index_Sub_Menu) + 1 = 2 Then
+			Browser("DPLK").Page("Sidebar").Link("Sub Menu").SetTOProperty "text", Cek_Index_Sub_Menu(0)
+			Browser("DPLK").Page("Sidebar").Link("Sub Menu").SetTOProperty "index", Cek_Index_Sub_Menu(1)
+		else
+			Browser("DPLK").Page("Sidebar").Link("Sub Menu").SetTOProperty "text", Sub_Menu	
+		End If	
+		Browser("DPLK").Page("Sidebar").Link("Sub Menu").Click
+		
+		If Sub_Sub_Menu <> "" Then
+			Browser("DPLK").Page("Sidebar").Link("Sub Sub Menu").SetTOProperty "text", Sub_Sub_Menu	
+			If not Browser("DPLK").Page("Sidebar").Link("Sub Sub Menu").Exist(2) Then
+				Browser("DPLK").Page("Sidebar").Link("Sub Menu").Click
+			End If
+			Browser("DPLK").Page("Sidebar").Link("Sub Sub Menu").Click
+		End If
+	End If
+	
+End Sub
+
+Sub AC_Direct_GoTo_Menu(Menu_Name,order)
+	Set objkey = CreateObject("WScript.Shell")
+	Browser("DPLK").Page("Sidebar").WebElement("Field Search Sidebar Menu").Click
+	wait 2
+	objkey.SendKeys Menu_Name
+	wait 5
+	If order <> 0 and order <> 1 Then
+		For Iterator = 1 To order - 1 Step 1
+			objkey.SendKeys "{DOWN}"
+			wait 1
+		Next
+	End If
+	objkey.SendKeys "{ENTER}"
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Sidebar"),"Masuk Menu", "Menu Yang Dituju :  " & Menu_Name ,  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+End Sub
+
+Sub AC_Direct_GoTo_Menu_No_SS(Menu_Name,order)
+	Set objkey = CreateObject("WScript.Shell")
+	Browser("DPLK").Page("Sidebar").WebElement("Field Search Sidebar Menu").Click
+	wait 2
+	objkey.SendKeys Menu_Name
+	wait 5
+	If order <> 0 and order <> 1 Then
+		For Iterator = 1 To order - 1 Step 1
+			objkey.SendKeys "{DOWN}"
+			wait 1
+		Next
+	End If
+	objkey.SendKeys "{ENTER}"
+	wait 2
+End Sub
 
 
 Sub RefreshPage
 	Set objkey = CreateObject("WScript.Shell")
 	objkey.SendKeys "{F5}"
 	wait 5
+End Sub
+
+Sub Combine_2_Variable(Var1,Var2)
+	Combine_2_Variable_Comma = var1 & "," & var2
+End Sub
+
+Sub Get_Var_To_Clipboard(var)
+	Set objkey = CreateObject("WScript.Shell")
+	
+	objkey.SendKeys "{F6}"
+	wait 2
+	objkey.SendKeys "{BACKSPACE}"
+	wait 1
+	objkey.SendKeys Var
+	wait 1
+	objkey.SendKeys "^a"
+	wait 1
+	objkey.SendKeys "^c"
+	wait 2
+	objkey.SendKeys "{ESC}"
+End Sub
+
+Sub Split_Clipboard_To_Var(splitter)
+	Set PasteData = CreateObject("Mercury.Clipboard")
+	data_Split_Clipboard = Split(PasteData.GetText,splitter)
+End Sub
+
+Sub Search_Using_CTRL_F(value,Enter)
+	Set objkey = CreateObject("WScript.Shell")
+	Set devices = CreateObject("Mercury.DeviceReplay")
+	
+'	x_Mentah = Window("SS_Full_Screen").GetTOProperty("width")
+'	y_Mentah = Window("SS_Full_Screen").GetTOProperty("height")
+'	
+'	x = x_Mentah + (x_Mentah/2)
+'	y = y_Mentah + (y_Mentah/2)
+	
+	y = 384
+	x = 683
+	
+	devices.MouseMove x , y
+	devices.MouseClick x , y , LEFT_MOUSE_BUTTON
+	
+	wait 5
+	objkey.SendKeys "^f"
+	wait 5
+	objkey.SendKeys value
+	wait 2
+	
+	If Enter <> 0 Then
+		For Iterator = 1 To Enter Step 1
+			objkey.SendKeys "{ENTER}"		
+		Next	
+	End If
+	
+	wait 2
+	Call CaptureImageUFTV2(Window("SS_Full_Screen"),"Berikut Data Yang Dicari", "Data yang dicari : " & value ,  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
 End Sub

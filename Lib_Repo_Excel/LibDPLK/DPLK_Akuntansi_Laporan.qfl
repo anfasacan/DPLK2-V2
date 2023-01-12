@@ -1,5 +1,5 @@
 ﻿REM ==== Login To Download
-Sub Login_Download()
+Sub Login_Download_Akuntansi_Laporan()
 	Set objkey = CreateObject("WScript.Shell")
 	Set PasteData = CreateObject("Mercury.Clipboard")
 '	objkey.SendKeys ("^{TAB}")

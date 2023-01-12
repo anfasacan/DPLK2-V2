@@ -1,0 +1,82 @@
+﻿Sub Login_Download()
+	Set objkey = CreateObject("WScript.Shell")
+	Set PasteData = CreateObject("Mercury.Clipboard")
+'	objkey.SendKeys ("^{TAB}")
+	wait 3
+	objkey.SendKeys "{F6}"
+	wait 2
+	objkey.SendKeys "^c"
+	wait 2
+	objkey.SendKeys "{ESC}"
+	Link_URL = PasteData.GetText
+	PasteData.SetText ""
+	If instr(1,Link_URL, "192.168.132.153") <> 0 or InStr(1,Link_URL,"192.168.132.155") Then
+		objkey.SendKeys("DPLKCORERPTDEV\user_rpt")
+		wait 1
+		objkey.SendKeys "{TAB}"
+		wait 1
+		objkey.SendKeys "dplkbni1234/"
+		wait 1
+		objkey.SendKeys "{ENTER}"
+	End If
+End Sub
+
+Sub Lihat_Investasi_Pasar_Uang_Dealing_Ticket_Deposito
+	Set objkey = CreateObject("WScript.Shell")
+	wait 3
+	If InStr(1, DataTable.Value("TC_ID",dtlocalsheet), "DPLKAKT004") <> 0 Then
+		Browser("DPLK").Page("Dealing Ticket Deposito").WebEdit("Field Search").Set Dokumen_Induk
+	ElseIf InStr(1, DataTable.Value("TC_ID",dtlocalsheet), "DPLKAKT005") <> 0 Then
+		Browser("DPLK").Page("Dealing Ticket Deposito").WebEdit("Field Search").Set Dokumen_Induk
+	else
+		Browser("DPLK").Page("Dealing Ticket Deposito").WebEdit("Field Search").Set DataTable.Value("KODE_JURNAL",dtlocalsheet)
+	End If
+	
+	wait 5
+	Browser("DPLK").Page("Dealing Ticket Deposito").WebElement("Btn Lihat").Click
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Dealing Ticket Deposito"),"Masuk Menu Lihat Data, Berikut Data Yang Dipilih", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+End Sub
+
+Sub Cetak_Investasi_Laporan_Transaksi
+	Set objkey = CreateObject("WScript.Shell")
+	
+	Browser("DPLK").Page("Laporan Transaksi").WebElement("Dropdown Nama Laporan").Click
+	wait 2
+	objkey.SendKeys DataTable.Value("NAMA_LAPORAN",dtlocalsheet)
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	wait 2
+	
+	Browser("DPLK").Page("Laporan Transaksi").WebElement("Dropdown Kantor").Click
+	wait 2
+	objkey.SendKeys DataTable.Value("KANTOR",dtlocalsheet)
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	wait 2
+	
+	Browser("DPLK").Page("Laporan Transaksi").WebElement("Dropdown Produk").Click
+	wait 2
+	objkey.SendKeys DataTable.Value("PRODUK",dtlocalsheet)
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	wait 2
+	
+	Browser("DPLK").Page("Laporan Transaksi").WebElement("Dropdown Portofolio").Click
+	wait 2
+	objkey.SendKeys DataTable.Value("PORTOFOLIO",dtlocalsheet)
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	wait 2
+	
+	Browser("DPLK").Page("Laporan Transaksi").WebEdit("Field Tanggal Periode Awal").Set DataTable.value("TANGGAL_AWAL",dtlocalsheet)
+	Browser("DPLK").Page("Laporan Transaksi").WebEdit("Field Tanggal Periode Akhir").Set DataTable.value("TANGGAL_AKHIR",dtlocalsheet)
+
+	
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Laporan Transaksi"),"Ubah/Isi Field yang Diperlukan, Lalu Tekan Tombol Cetak", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	
+	Browser("DPLK").Page("Laporan Transaksi").WebButton("Btn Cetak").Click
+End Sub

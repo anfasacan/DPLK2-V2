@@ -1,0 +1,152 @@
+﻿Sub Lihat_Entry_Jurnal_Transaksi
+	Set objkey = CreateObject("WScript.Shell")
+	Browser("DPLK").Page("Entry Jurnal Transaksi").WebEdit("Field Search").Set DataTable.value("SEARCH_DOKUMEN_ID",dtlocalsheet)
+	wait 7
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Entry Jurnal Transaksi"),"Cari Data Yang Ingin Digunakan", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	Browser("DPLK").Page("Entry Jurnal Transaksi").WebElement("Btn Lihat").Click
+	wait 3
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Entry Jurnal Transaksi"),"Masuk Menu Lihat Data, Berikut Data Yang Dipilih", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	objkey.SendKeys "{PGDN}"
+	wait 3
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Entry Jurnal Transaksi"),"Masuk Menu Lihat Data, Berikut Data Yang Dipilih", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+End Sub
+
+Sub Ambil_Kode_Jurnal_Standar
+	Set objkey = CreateObject("WScript.Shell")
+	Browser("DPLK").Page("Sidebar").WebElement("Field Search Sidebar Menu").Click
+	wait 1
+	objkey.SendKeys "Entry Jurnal Transaksi"
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	wait 2
+	Browser("DPLK").Page("Entry Jurnal Transaksi").WebEdit("Field Search").Set DataTable.value("SEARCH_DOKUMEN_ID",dtlocalsheet)
+	wait 10
+	Browser("DPLK").Page("Entry Jurnal Transaksi").WebElement("Btn Lihat").Click
+	wait 3
+	
+	Kode_Jurnal_Standar = Browser("DPLK").Page("Entry Jurnal Transaksi").WebEdit("Field Kode Jurnal Standar").GetROProperty("value")
+End Sub
+
+Sub Ambil_Dokumen_Induk
+	Set objkey = CreateObject("WScript.Shell")
+	Browser("DPLK").Page("Sidebar").WebElement("Field Search Sidebar Menu").Click
+	wait 1
+	objkey.SendKeys "Entry Jurnal Transaksi"
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	wait 2
+	Browser("DPLK").Page("Entry Jurnal Transaksi").WebEdit("Field Search").Set DataTable.value("SEARCH_DOKUMEN_ID",dtlocalsheet)
+	wait 10
+	Browser("DPLK").Page("Entry Jurnal Transaksi").WebElement("Btn Lihat").Click
+	wait 3
+	
+	Dokumen_Induk = Browser("DPLK").Page("Entry Jurnal Transaksi").WebEdit("Field Dokumen induk").GetROProperty("value")
+End Sub
+
+Sub Ambil_Kode_Buku
+	Set objkey = CreateObject("WScript.Shell")
+	Browser("DPLK").Page("Sidebar").WebElement("Field Search Sidebar Menu").Click
+	wait 1
+	objkey.SendKeys "Entry Jurnal Transaksi"
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	wait 2
+	Browser("DPLK").Page("Entry Jurnal Transaksi").WebEdit("Field Search").Set DataTable.value("SEARCH_DOKUMEN_ID",dtlocalsheet)
+	wait 10
+	Browser("DPLK").Page("Entry Jurnal Transaksi").WebElement("Btn Lihat").Click
+	wait 3
+	
+	Kode_Buku = Browser("DPLK").Page("Entry Jurnal Transaksi").WebEdit("Field Kode Buku").GetROProperty("value")
+End Sub
+
+Sub Ambil_Nomer_Rekening
+	Set objkey = CreateObject("WScript.Shell")
+	Browser("DPLK").Page("Sidebar").WebElement("Field Search Sidebar Menu").Click
+	wait 1
+	objkey.SendKeys "Entry Jurnal Transaksi"
+	wait 2
+	objkey.SendKeys "{ENTER}"
+	wait 2
+	Browser("DPLK").Page("Entry Jurnal Transaksi").WebEdit("Field Search").Set DataTable.value("SEARCH_DOKUMEN_ID",dtlocalsheet)
+	wait 10
+	Browser("DPLK").Page("Entry Jurnal Transaksi").WebElement("Btn Lihat").Click
+	wait 3
+	
+	Nomer_Rekening = Browser("DPLK").Page("Entry Jurnal Transaksi").WebEdit("Field Nomer Rekening").GetROProperty("value")
+End Sub
+
+
+
+Sub Compare_Debit_And_Credit
+	Dim Total_Debit, Total_Credit
+	Set objkey = CreateObject("WScript.Shell")
+	objkey.SendKeys "{PGDN}"
+	jumlah_Row = Browser("DPLK").Page("Entry Jurnal Transaksi").WebTable("Table Entry Jurnal Transaksi").RowCount()
+	
+	For Iterator = 2 To jumlah_Row Step 1
+		'Get Debit Credit
+		Credit = Browser("DPLK").Page("Entry Jurnal Transaksi").WebTable("Table Entry Jurnal Transaksi").GetCellData(iterator,7)
+		Debit = Browser("DPLK").Page("Entry Jurnal Transaksi").WebTable("Table Entry Jurnal Transaksi").GetCellData(iterator,6)
+		'Contert Debit Credit To Integer
+		Credit = Replace(Credit,".","")
+		Credit = Replace(Credit,",",".")
+		Int_Credit = CDbl(Credit)
+		
+		
+		Debit = Replace(Debit,".","")
+		Debit = Replace(Debit,",",".")
+		Int_Debit = CDbl(Debit)
+		
+		Total_Credit = Total_Credit + Int_Credit
+		Total_Debit = Total_Debit + Int_Debit
+	Next
+	
+	If Total_Debit = Total_Credit Then
+		wait 2
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Entry Jurnal Transaksi"),"Nilai Kredit dan Debit Sama ", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+		wait 2
+	else
+		wait 2
+		Call CaptureImageUFTV2(Browser("DPLK").Page("Entry Jurnal Transaksi"),"Nilai Kredit dan Debit Beda ", " ",  compatibilityMode.Desktop, ReportStatus.Failed)
+		wait 2
+	End If
+End Sub
+
+Sub Search_Setup_Bank_By_Entry_Jurnal_Transaksi
+	Total_Row = Browser("DPLK").Page("Entry Jurnal Transaksi").WebTable("Table Entry Jurnal Transaksi").RowCount
+	For Iterator = 2 To Total_Row Step 1
+	wait 7
+		If Browser("DPLK").Page("Entry Jurnal Transaksi").WebTable("Table Entry Jurnal Transaksi").GetCellData(iterator,6) <> "0,00" Then
+			Nama_Akun = Browser("DPLK").Page("Entry Jurnal Transaksi").WebTable("Table Entry Jurnal Transaksi").GetCellData(iterator,4)
+			Nama_Akun = Split(Nama_Akun,"-")
+			Final_Nama_Akun = Mid(Nama_Akun(1),2)
+			
+			wait 2
+			If Iterator = 2 Then
+				Call AC_GoTo_Menu()
+			else
+				Call AC_GoTo_Menu_No_SS()
+			End If
+			
+			Wait 4
+			
+			Browser("DPLK").Page("Setup Rekening").WebEdit("Field Search Produk").Set Final_Nama_Akun
+			
+			wait 2
+			Call CaptureImageUFTV2(Browser("DPLK").Page("Setup Rekening"),"Berikut Hasil Produk Yang Dicari ", "Produk Yang Dicari :  " & Final_Nama_Akun,  compatibilityMode.Desktop, ReportStatus.Passed)
+			wait 2
+			
+			Call AC_Direct_GoTo_Menu_No_SS("Entry Jurnal Transaksi",1)
+			
+			wait 2
+			Browser("DPLK").Page("Entry Jurnal Transaksi").WebEdit("Field Search").Set DataTable.value("SEARCH_DOKUMEN_ID",dtlocalsheet)
+			wait 7
+			Browser("DPLK").Page("Entry Jurnal Transaksi").WebElement("Btn Lihat").Click
+			wait 2
+		End If
+	Next
+
+End Sub

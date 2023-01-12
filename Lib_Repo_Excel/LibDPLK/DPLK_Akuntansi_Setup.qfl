@@ -488,7 +488,18 @@ End Sub
 
 Sub Lihat_Setup_Akuntansi_Setup_Jurnal_Standar
 	wait 3
-	Browser("DPLK").Page("Setup Jurnal Standar").WebEdit("Field Search").Set DataTable.Value("KODE_JURNAL",dtlocalsheet)
+	If InStr(1, DataTable.Value("TC_ID",dtlocalsheet), "DPLKAKT003") <> 0 Then
+		Browser("DPLK").Page("Setup Jurnal Standar").WebEdit("Field Search").Set Kode_Jurnal_Standar
+	ElseIf InStr(1, DataTable.Value("TC_ID",dtlocalsheet), "DPLKAKT004") <> 0 Then
+		Browser("DPLK").Page("Setup Jurnal Standar").WebEdit("Field Search").Set Kode_Jurnal_Standar
+	ElseIf InStr(1, DataTable.Value("TC_ID",dtlocalsheet), "DPLKAKT005") <> 0 Then
+		Browser("DPLK").Page("Setup Jurnal Standar").WebEdit("Field Search").Set Kode_Jurnal_Standar
+	ElseIf InStr(1, DataTable.Value("TC_ID",dtlocalsheet), "DPLKAKT006") <> 0 Then
+		Browser("DPLK").Page("Setup Jurnal Standar").WebEdit("Field Search").Set Kode_Jurnal_Standar
+	else
+		Browser("DPLK").Page("Setup Jurnal Standar").WebEdit("Field Search").Set DataTable.Value("KODE_JURNAL",dtlocalsheet)
+	End If
+'	Browser("DPLK").Page("Setup Jurnal Standar").WebEdit("Field Search").Set DataTable.Value("KODE_JURNAL",dtlocalsheet)
 	wait 5
 	Browser("DPLK").Page("Setup Jurnal Standar").WebElement("Btn Lihat").Click
 	wait 2
@@ -2025,10 +2036,21 @@ Sub Ubah_Setup_Akuntansi_Setup_Rekening
 End Sub
 
 Sub Lihat_Setup_Akuntansi_Setup_Rekening
+	Set objkey = CreateObject("WScript.Shell")
 	wait 3
-	Browser("DPLK").Page("Setup Rekening").WebEdit("Field Search").Set DataTable.Value("NAMA_PEMILIK_REKENING",dtlocalsheet)
+	If InStr(1,DataTable.Value("TC_ID",dtlocalsheet),"DPLKAKT005") <> 0 Then
+		Browser("DPLK").Page("Setup Rekening").WebEdit("Field Search").Set Nomer_Rekening
+	ElseIf InStr(1,DataTable.Value("TC_ID",dtlocalsheet),"DPLKAKT006") <> 0 Then
+		Browser("DPLK").Page("Setup Rekening").WebEdit("Field Search").Set Nomer_Rekening
+	Else 
+		Browser("DPLK").Page("Setup Rekening").WebEdit("Field Search").Set DataTable.Value("NAMA_PEMILIK_REKENING",dtlocalsheet)	
+	End If
 	wait 5
 	Browser("DPLK").Page("Setup Rekening").WebElement("Btn Lihat").Click
+	wait 2
+	Call CaptureImageUFTV2(Browser("DPLK").Page("Setup Rekening"),"Masuk Menu Lihat Data, Berikut Data Yang Dipilih", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
+	wait 2
+	objkey.SendKeys "{PGDN}"
 	wait 2
 	Call CaptureImageUFTV2(Browser("DPLK").Page("Setup Rekening"),"Masuk Menu Lihat Data, Berikut Data Yang Dipilih", " ",  compatibilityMode.Desktop, ReportStatus.Passed)
 	wait 2

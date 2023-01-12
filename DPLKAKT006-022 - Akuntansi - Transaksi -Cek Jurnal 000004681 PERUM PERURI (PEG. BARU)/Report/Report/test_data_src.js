@@ -1,0 +1,1 @@
+﻿var __testDataSource={items:[{dataFilePath:'Default.xlsx',dataFileFormat:'excel',dataFileFolder:'C:\\Users\\1442\\Desktop\\DPLK 2\\DPLKAKT006-020 - Akuntansi - Transaksi -Cek Jurnal 000004603 PRAMITA LAB\\Report',namePairs:[]}]};
